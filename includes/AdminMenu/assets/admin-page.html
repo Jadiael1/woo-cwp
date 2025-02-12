@@ -1,0 +1,122 @@
+<script src="https://cdn.tailwindcss.com"></script>
+<div class="bg-gray-100 p-6 max-w-full">
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="p-6 border-b">
+            <h1 class="text-2xl font-bold text-gray-800">Configurações do WooCWP</h1>
+            <p class="text-gray-600">Gerencie as configurações da integração com CWP.</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex border-b">
+            <button id="woo-cwp-menu-btn"
+                class="tab-btn py-3 px-6 text-gray-600 border-b-4 border-transparent hover:text-blue-500">Geral</button>
+            <button id="woo-cwp-settings-btn"
+                class="tab-btn py-3 px-6 text-gray-600 border-b-4 border-transparent hover:text-blue-500">Configurações</button>
+        </div>
+
+        <!-- Conteúdo das abas -->
+        <div class="p-6 max-w-3xl">
+            <!-- Aba Geral (inativa por enquanto) -->
+            <div id="woo-cwp-menu" class="tab-content">
+                <h2 class="text-xl font-semibold text-gray-800">Geral</h2>
+                <p class="text-gray-600">Com este plugin, quando um pagamento for aprovado com sucesso, a conta no
+                    painel CWP é criada.</p>
+            </div>
+
+            <!-- Aba Configurações -->
+            <div id="woo-cwp-settings" class="tab-content">
+                <h2 class="text-xl font-semibold text-gray-800">Configuração da API CWP</h2>
+                <p class="text-gray-600 mb-4">Informe os detalhes para a conexão com o painel CWP.</p>
+
+                <form id="config-form" class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium">URL da API</label>
+                        <input type="url" id="cwp-url"
+                            class="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300"
+                            placeholder="https://meu-cwp.com/api" required>
+                        <p id="url-error" class="text-red-500 text-sm hidden">URL inválida!</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-medium">Token de Acesso</label>
+                        <input type="text" id="cwp-token"
+                            class="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300"
+                            placeholder="Seu token secreto" required>
+                        <p id="token-error" class="text-red-500 text-sm hidden">Token é obrigatório!</p>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition">
+                        Salvar Configurações
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const getUrlParam = (param, url = window.location.href) => {
+        return new URL(url).searchParams.get(param);
+    };
+    const navigateWithURL = (page) => {
+        const url = new URL('wp-admin/admin.php', window.location.origin);
+        url.searchParams.set('page', page);
+        window.location.href = url.toString();
+    };
+
+    const tabsBtn = document.querySelectorAll('.tab-btn');
+    for (element of tabsBtn) {
+        const page = element.getAttribute("id").replace('-btn', '');
+        element.addEventListener('click', evt => {
+            navigateWithURL(page);
+        });
+    }
+
+    const contents = document.querySelectorAll('.tab-content');
+    const page = getUrlParam('page');
+    for (const element of contents) {
+        const elementID = element.getAttribute("id");
+        const elementBtn = document.querySelector(`#${elementID}-btn`);
+        if (elementID === page) {
+            element.classList.remove('hidden');
+            elementBtn.classList.add("border-blue-500", "text-blue-500");
+            continue;
+        }
+        element.classList.add('hidden');
+        elementBtn.classList.remove("border-blue-500", "text-blue-500");
+    }
+
+
+    const api_url = document.querySelector('#cwp-url');
+    const api_token = document.querySelector('#cwp-token');
+
+    const isToken = Boolean('{{IS_TOKEN}}');
+    const isURL = Boolean('{{IS_URL}}');
+    if (isToken) {
+        api_token.value = ``;
+        api_token.setAttribute('placeholder', '*****************************');
+    }
+    if (isURL) {
+        api_url.value = ``;
+        api_url.setAttribute('placeholder', '*****************************');
+    }
+
+
+    const form = document.querySelector("#config-form");
+    form.addEventListener('submit', evt => {
+        evt.preventDefault();
+        const headers = new Headers();
+        headers.append('Authorization', '{{AUTHORIZATION}}');
+        headers.append('Accept', 'application/json; charset=utf-8');
+        headers.append('Content-Type', 'application/json; charset=utf-8');
+
+        fetch('{{API_URL}}', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ "api_url": api_url.value, "api_token": api_token.value }),
+        }).then(resp => resp.json()).then(resp => console.log(resp)).catch(err => console.error(err));
+    });
+
+
+</script>
