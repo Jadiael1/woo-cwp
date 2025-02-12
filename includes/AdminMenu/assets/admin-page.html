@@ -29,23 +29,50 @@
                 <p class="text-gray-600 mb-4">Informe os detalhes para a conexão com o painel CWP.</p>
 
                 <form id="config-form" class="space-y-4">
-                    <div>
+                    <!-- URL da API -->
+                    <div class="space-y-2">
                         <label class="block text-gray-700 font-medium">URL da API</label>
-                        <input type="url" id="cwp-url"
-                            class="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300"
-                            placeholder="https://meu-cwp.com/api" required>
+                        <div class="relative">
+                            <input type="url" id="cwp-url"
+                                class="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 disabled:bg-gray-50 disabled:text-gray-500"
+                                placeholder="https://meu-cwp.com/api" required>
+                            <button type="button" id="edit-url"
+                                class="absolute right-2 top-2 text-blue-500 hover:text-blue-600 hidden">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path
+                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                                <span class="hidden">Cancelar</span>
+                            </button>
+                        </div>
+                        <p id="url-status" class="text-sm text-gray-600 hidden">URL da API já está configurada</p>
                         <p id="url-error" class="text-red-500 text-sm hidden">URL inválida!</p>
                     </div>
 
-                    <div>
+                    <!-- Token de Acesso -->
+                    <div class="space-y-2">
                         <label class="block text-gray-700 font-medium">Token de Acesso</label>
-                        <input type="text" id="cwp-token"
-                            class="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300"
-                            placeholder="Seu token secreto" required>
+                        <div class="relative">
+                            <input type="text" id="cwp-token"
+                                class="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 disabled:bg-gray-50 disabled:text-gray-500"
+                                placeholder="Seu token secreto" required>
+                            <button type="button" id="edit-token"
+                                class="absolute right-2 top-2 text-blue-500 hover:text-blue-600 hidden">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path
+                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                                <span class="hidden">Cancelar</span>
+                            </button>
+                        </div>
+                        <p id="token-status" class="text-sm text-gray-600 hidden">Token de acesso já está configurado
+                        </p>
                         <p id="token-error" class="text-red-500 text-sm hidden">Token é obrigatório!</p>
                     </div>
 
-                    <button type="submit"
+                    <button type="submit" id="save-btn"
                         class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition">
                         Salvar Configurações
                     </button>
@@ -59,12 +86,14 @@
     const getUrlParam = (param, url = window.location.href) => {
         return new URL(url).searchParams.get(param);
     };
+
     const navigateWithURL = (page) => {
         const url = new URL('wp-admin/admin.php', window.location.origin);
         url.searchParams.set('page', page);
         window.location.href = url.toString();
     };
 
+    // Configuração das tabs
     const tabsBtn = document.querySelectorAll('.tab-btn');
     for (element of tabsBtn) {
         const page = element.getAttribute("id").replace('-btn', '');
@@ -87,25 +116,77 @@
         elementBtn.classList.remove("border-blue-500", "text-blue-500");
     }
 
-
+    // Configuração dos campos de formulário
     const api_url = document.querySelector('#cwp-url');
     const api_token = document.querySelector('#cwp-token');
+    const editUrlBtn = document.querySelector('#edit-url');
+    const editTokenBtn = document.querySelector('#edit-token');
+    const urlStatus = document.querySelector('#url-status');
+    const tokenStatus = document.querySelector('#token-status');
+    const saveBtn = document.querySelector('#save-btn');
 
     const isToken = Boolean('{{IS_TOKEN}}');
     const isURL = Boolean('{{IS_URL}}');
+
+    // Configuração inicial dos campos
     if (isToken) {
-        api_token.value = ``;
+        api_token.value = '';
         api_token.setAttribute('placeholder', '*****************************');
+        api_token.setAttribute('disabled', true);
+        editTokenBtn.classList.remove('hidden');
+        tokenStatus.classList.remove('hidden');
     }
+
     if (isURL) {
-        api_url.value = ``;
+        api_url.value = '';
         api_url.setAttribute('placeholder', '*****************************');
+        api_url.setAttribute('disabled', true);
+        editUrlBtn.classList.remove('hidden');
+        urlStatus.classList.remove('hidden');
     }
 
+    // Função para alternar estado de edição
+    const toggleEdit = (input, button, status) => {
+        const isDisabled = input.hasAttribute('disabled');
+        if (isDisabled) {
+            input.removeAttribute('disabled');
+            input.focus();
+            button.querySelector('svg').classList.add('hidden');
+            button.querySelector('span').classList.remove('hidden');
+            status.classList.add('hidden');
+        } else {
+            input.setAttribute('disabled', true);
+            input.value = '';
+            input.setAttribute('placeholder', '*****************************');
+            button.querySelector('svg').classList.remove('hidden');
+            button.querySelector('span').classList.add('hidden');
+            status.classList.remove('hidden');
+        }
+    };
 
+    // Event listeners para botões de edição
+    editUrlBtn.addEventListener('click', () => toggleEdit(api_url, editUrlBtn, urlStatus));
+    editTokenBtn.addEventListener('click', () => toggleEdit(api_token, editTokenBtn, tokenStatus));
+
+    // Manipulação do formulário
     const form = document.querySelector("#config-form");
     form.addEventListener('submit', evt => {
         evt.preventDefault();
+
+        // Só envia os campos que foram modificados
+        const data = {};
+        if (!api_url.hasAttribute('disabled') && api_url.value) {
+            data.api_url = api_url.value;
+        }
+        if (!api_token.hasAttribute('disabled') && api_token.value) {
+            data.api_token = api_token.value;
+        }
+
+        // Se nenhum campo foi modificado, não faz nada
+        if (Object.keys(data).length === 0) {
+            return;
+        }
+
         const headers = new Headers();
         headers.append('Authorization', '{{AUTHORIZATION}}');
         headers.append('Accept', 'application/json; charset=utf-8');
@@ -114,9 +195,34 @@
         fetch('{{API_URL}}', {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({ "api_url": api_url.value, "api_token": api_token.value }),
-        }).then(resp => resp.json()).then(resp => console.log(resp)).catch(err => console.error(err));
+            body: JSON.stringify(data),
+        })
+            .then(resp => resp.json())
+            .then(resp => {
+                // Atualiza a interface após salvar com sucesso
+                if (data.api_url) {
+                    api_url.setAttribute('disabled', true);
+                    api_url.value = '';
+                    api_url.setAttribute('placeholder', '*****************************');
+                    editUrlBtn.classList.remove('hidden');
+                    editUrlBtn.querySelector('svg').classList.remove('hidden');
+                    editUrlBtn.querySelector('span').classList.add('hidden');
+                    urlStatus.classList.remove('hidden');
+                }
+                if (data.api_token) {
+                    api_token.setAttribute('disabled', true);
+                    api_token.value = '';
+                    api_token.setAttribute('placeholder', '*****************************');
+                    editTokenBtn.classList.remove('hidden');
+                    editTokenBtn.querySelector('svg').classList.remove('hidden');
+                    editTokenBtn.querySelector('span').classList.add('hidden');
+                    tokenStatus.classList.remove('hidden');
+                }
+                alert('Configurações salvas com sucesso!');
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Erro ao salvar as configurações. Por favor, tente novamente.');
+            });
     });
-
-
 </script>

@@ -6,6 +6,8 @@ use WooCWP\Includes\Activate;
 use WooCWP\Includes\Deactivate;
 use WooCWP\Includes\AdminMenu\AddAdminMenu;
 use WooCWP\Includes\ApiEndpoint;
+use WooCWP\Includes\AddCustomCheckoutFields;
+use WooCWP\Includes\ProcessSharesAfterPayment;
 
 defined('ABSPATH') || exit;
 
@@ -60,5 +62,20 @@ final class MainIncludes
     public function registerRoutes()
     {
         ApiEndpoint::register_routes();
+    }
+
+    public function addCustomCheckoutFields($checkout)
+    {
+        AddCustomCheckoutFields::addCustomCheckoutFields($checkout);
+    }
+
+    public function validateCustomFieldsCheckout($data, $errors)
+    {
+        AddCustomCheckoutFields::validateCustomFieldsCheckout($data, $errors);
+    }
+
+    public function processSharesAfterPayment($order_id)
+    {
+        ProcessSharesAfterPayment::processSharesAfterPayment($order_id);
     }
 }

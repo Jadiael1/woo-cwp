@@ -55,5 +55,13 @@ if (class_exists('WooCWP\Includes\MainIncludes') && file_exists($mainIncludesFil
     add_action('admin_menu', array($pluginInstance, 'addAdminMenu'));
 
     // Hook para registrar os endpoints na API REST
-    add_action('rest_api_init', [$pluginInstance, 'registerRoutes']);
+    add_action('rest_api_init', array($pluginInstance, 'registerRoutes'));
+
+    // hook para adicionar novos campos na tela de checkout do woocommerce
+    add_action('woocommerce_after_order_notes', array($pluginInstance, 'addCustomCheckoutFields'), 10, 1);
+
+    // Valida os campos personalizados no checkout
+    add_action('woocommerce_after_checkout_validation', array($pluginInstance, 'validateCustomFieldsCheckout'), 10, 2);
+
+    add_action('woocommerce_payment_complete', array($pluginInstance, 'processSharesAfterPayment'));
 }

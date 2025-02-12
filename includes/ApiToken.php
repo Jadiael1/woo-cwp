@@ -17,8 +17,8 @@ class ApiToken
         $expiration = time() + (5 * 60);
 
         // Salva o token e a expiração no banco de dados
-        update_option('woo_cwp_api_token', $password);
-        update_option('woo_cwp_api_token_expiration', $expiration);
+        update_option('woo_cwp_api_token_basic', $password);
+        update_option('woo_cwp_api_token_basic_expiration', $expiration);
 
         return "Basic " . $basic_auth;
     }
@@ -29,8 +29,8 @@ class ApiToken
         // error_log(json_encode($auth_header) . PHP_EOL, 3, WOO_CWP_PLUGIN_PATH . '/includes/log.json');
         
         // Obtém o token salvo
-        $saved_token = get_option('woo_cwp_api_token', '');
-        $expiration = get_option('woo_cwp_api_token_expiration', 0);
+        $saved_token = get_option('woo_cwp_api_token_basic', '');
+        $expiration = get_option('woo_cwp_api_token_basic_expiration', 0);
 
         // Se expirou ou não existir, rejeita
         if (time() > $expiration || empty($saved_token)) {
@@ -45,8 +45,8 @@ class ApiToken
             // Verifica se a senha bate
             if ($pass === $saved_token) {
                 // Token válido, remove-o para evitar reutilização
-                delete_option('woo_cwp_api_token');
-                delete_option('woo_cwp_api_token_expiration');
+                delete_option('woo_cwp_api_token_basic');
+                delete_option('woo_cwp_api_token_basic_expiration');
 
                 return true;
             }

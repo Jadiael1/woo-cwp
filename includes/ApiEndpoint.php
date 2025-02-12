@@ -25,18 +25,22 @@ class ApiEndpoint
         $params = $request->get_json_params();
 
         // Valida os campos obrigatórios
-        if (empty($params['api_url']) || empty($params['api_token'])) {
+        if (empty($params['api_url']) && empty($params['api_token'])) {
             return new \WP_REST_Response(['message' => 'URL da API e Token são obrigatórios!'], 400);
         }
 
-        // Sanitiza os inputs para evitar XSS/injeção de código
-        $api_url   = \WooCWP\Includes\SecureStorage::encrypt(esc_url_raw($params['api_url']));
         // echo "<pre>", var_dump($api_url), "</pre>"; exit;
-        $api_token = \WooCWP\Includes\SecureStorage::encrypt(sanitize_text_field($params['api_token']));
-
+        
         // Salva os dados nas opções do WordPress
-        update_option('woo_cwp_api_url', $api_url);
-        update_option('woo_cwp_api_token', $api_token);
+        // Sanitiza os inputs para evitar XSS/injeção de código
+        if (!empty($params['api_url'])) {
+            $api_url   = \WooCWP\Includes\SecureStorage::encrypt(esc_url_raw($params['api_url']));
+            update_option('woo_cwp_api_url', $api_url);
+        }
+        if (!empty($params['api_token'])) {
+            $api_token = \WooCWP\Includes\SecureStorage::encrypt(sanitize_text_field($params['api_token']));
+            update_option('woo_cwp_api_token', $api_token);
+        }
 
         return new \WP_REST_Response(['message' => 'Configurações salvas com sucesso!'], 200);
     }
