@@ -63,5 +63,9 @@ if (class_exists('WooCWP\Includes\MainIncludes') && file_exists($mainIncludesFil
     // Valida os campos personalizados no checkout
     add_action('woocommerce_after_checkout_validation', array($pluginInstance, 'validateCustomFieldsCheckout'), 10, 2);
 
+    // Salva o campos personalizado na tela de checkout como meta dados na ordem gerada
+    add_action('woocommerce_checkout_update_order_meta', array($pluginInstance, 'checkoutUpdateOrderMeta'));
+
+    // processa criação da conta no CWP apos pagamento completo
     add_action('woocommerce_payment_complete', array($pluginInstance, 'processSharesAfterPayment'));
 }

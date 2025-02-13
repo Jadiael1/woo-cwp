@@ -78,4 +78,11 @@ final class MainIncludes
     {
         ProcessSharesAfterPayment::processSharesAfterPayment($order_id);
     }
+
+    public function checkoutUpdateOrderMeta($order_id)
+    {
+        if (!empty($_POST['billing_domain'])) {
+            update_post_meta($order_id, '_billing_domain', sanitize_text_field($_POST['billing_domain']));
+        }
+    }
 }
