@@ -17,11 +17,13 @@ class AddAdminMenu
             $apiURL = rest_url() . 'woo-cwp/v1/save-settings/';
             $isToken = (bool) get_option('woo_cwp_api_token') ?? false;
             $isUrl = (bool) get_option('woo_cwp_api_url') ?? false;
+            $isIP = (bool) get_option('woo_cwp_api_ip') ?? false;
 
             $fileContent = str_replace("{{AUTHORIZATION}}", esc_html($token), $fileContent);
             $fileContent = str_replace("{{API_URL}}", esc_html($apiURL), $fileContent);
             $fileContent = str_replace("{{IS_TOKEN}}", esc_html($isToken), $fileContent);
             $fileContent = str_replace("{{IS_URL}}", esc_html($isUrl), $fileContent);
+            $fileContent = str_replace("{{IS_IP}}", esc_html($isIP), $fileContent);
 
             echo $fileContent;
         } else {

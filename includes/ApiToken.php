@@ -45,8 +45,8 @@ class ApiToken
             // Verifica se a senha bate
             if ($pass === $saved_token) {
                 // Token válido, remove-o para evitar reutilização
-                delete_option('woo_cwp_api_token_basic');
-                delete_option('woo_cwp_api_token_basic_expiration');
+                // delete_option('woo_cwp_api_token_basic');
+                // delete_option('woo_cwp_api_token_basic_expiration');
 
                 return true;
             }

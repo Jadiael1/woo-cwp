@@ -25,12 +25,12 @@ class ApiEndpoint
         $params = $request->get_json_params();
 
         // Valida os campos obrigatórios
-        if (empty($params['api_url']) && empty($params['api_token'])) {
-            return new \WP_REST_Response(['message' => 'URL da API e Token são obrigatórios!'], 400);
+        if (empty($params['api_url']) && empty($params['api_token']) && empty($params['api_ip'])) {
+            return new \WP_REST_Response(['message' => 'URL da API, IP do servidor CWP ou Token são obrigatórios!'], 400);
         }
 
         // echo "<pre>", var_dump($api_url), "</pre>"; exit;
-        
+
         // Salva os dados nas opções do WordPress
         // Sanitiza os inputs para evitar XSS/injeção de código
         if (!empty($params['api_url'])) {
@@ -40,6 +40,10 @@ class ApiEndpoint
         if (!empty($params['api_token'])) {
             $api_token = \WooCWP\Includes\SecureStorage::encrypt(sanitize_text_field($params['api_token']));
             update_option('woo_cwp_api_token', $api_token);
+        }
+        if (!empty($params['api_ip']) && filter_var($params['api_ip'], FILTER_VALIDATE_IP)) {
+            $api_ip = \WooCWP\Includes\SecureStorage::encrypt($params['api_ip']);
+            update_option('woo_cwp_api_ip', $api_ip);
         }
 
         return new \WP_REST_Response(['message' => 'Configurações salvas com sucesso!'], 200);

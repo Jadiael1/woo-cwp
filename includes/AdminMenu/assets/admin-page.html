@@ -35,7 +35,7 @@
                         <div class="relative">
                             <input type="url" id="cwp-url"
                                 class="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 disabled:bg-gray-50 disabled:text-gray-500"
-                                placeholder="https://meu-cwp.com/api" required>
+                                placeholder="https://srv1.domain.com:2304/v1/" required>
                             <button type="button" id="edit-url"
                                 class="absolute right-2 top-2 text-blue-500 hover:text-blue-600 hidden">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
@@ -56,7 +56,7 @@
                         <div class="relative">
                             <input type="text" id="cwp-token"
                                 class="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 disabled:bg-gray-50 disabled:text-gray-500"
-                                placeholder="Seu token secreto" required>
+                                placeholder="https://srv1.domain.com:2304/v1/" required>
                             <button type="button" id="edit-token"
                                 class="absolute right-2 top-2 text-blue-500 hover:text-blue-600 hidden">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
@@ -70,6 +70,28 @@
                         <p id="token-status" class="text-sm text-gray-600 hidden">Token de acesso já está configurado
                         </p>
                         <p id="token-error" class="text-red-500 text-sm hidden">Token é obrigatório!</p>
+                    </div>
+
+                    <!-- IP do servidor CWP -->
+                    <div class="space-y-2">
+                        <label class="block text-gray-700 font-medium">IP do servidor CWP</label>
+                        <div class="relative">
+                            <input type="text" id="cwp-ip"
+                                class="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 disabled:bg-gray-50 disabled:text-gray-500"
+                                placeholder="151.61.212.82" required>
+                            <button type="button" id="edit-ip"
+                                class="absolute right-2 top-2 text-blue-500 hover:text-blue-600 hidden">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path
+                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                                <span class="hidden">Cancelar</span>
+                            </button>
+                        </div>
+                        <p id="ip-status" class="text-sm text-gray-600 hidden">IP já está configurado
+                        </p>
+                        <p id="ip-error" class="text-red-500 text-sm hidden">IP é obrigatório!</p>
                     </div>
 
                     <button type="submit" id="save-btn"
@@ -117,6 +139,9 @@
     }
 
     // Configuração dos campos de formulário
+    const api_ip = document.querySelector('#cwp-ip');
+    const editIPBtn = document.querySelector('#edit-ip');
+    const ipStatus = document.querySelector('#ip-status');
     const api_url = document.querySelector('#cwp-url');
     const api_token = document.querySelector('#cwp-token');
     const editUrlBtn = document.querySelector('#edit-url');
@@ -127,6 +152,7 @@
 
     const isToken = Boolean('{{IS_TOKEN}}');
     const isURL = Boolean('{{IS_URL}}');
+    const isIP = Boolean('{{IS_IP}}');
 
     // Configuração inicial dos campos
     if (isToken) {
@@ -145,12 +171,29 @@
         urlStatus.classList.remove('hidden');
     }
 
+    if (isIP) {
+        api_ip.value = '';
+        api_ip.setAttribute('placeholder', '*****************************');
+        api_ip.setAttribute('disabled', true);
+        editIPBtn.classList.remove('hidden');
+        ipStatus.classList.remove('hidden');
+    }
+
     // Função para alternar estado de edição
     const toggleEdit = (input, button, status) => {
         const isDisabled = input.hasAttribute('disabled');
         if (isDisabled) {
             input.removeAttribute('disabled');
             input.focus();
+            if (input.getAttribute("id") === 'cwp-url') {
+                input.setAttribute('placeholder', `https://srv1.domain.com:2304/v1/`);
+            }
+            if (input.getAttribute("id") === 'cwp-token') {
+                input.setAttribute('placeholder', `GRy3VbXmHnKKIqs9UTuAuNUhao6wkZXpG8nzdRNhKEd9qSjMJ6iKMrysGl8b6GB0wFvm1A`);
+            }
+            if (input.getAttribute("id") === 'cwp-ip') {
+                input.setAttribute('placeholder', `151.61.212.82`);
+            }
             button.querySelector('svg').classList.add('hidden');
             button.querySelector('span').classList.remove('hidden');
             status.classList.add('hidden');
@@ -167,6 +210,7 @@
     // Event listeners para botões de edição
     editUrlBtn.addEventListener('click', () => toggleEdit(api_url, editUrlBtn, urlStatus));
     editTokenBtn.addEventListener('click', () => toggleEdit(api_token, editTokenBtn, tokenStatus));
+    editIPBtn.addEventListener('click', () => toggleEdit(api_ip, editIPBtn, ipStatus));
 
     // Manipulação do formulário
     const form = document.querySelector("#config-form");
@@ -180,6 +224,9 @@
         }
         if (!api_token.hasAttribute('disabled') && api_token.value) {
             data.api_token = api_token.value;
+        }
+        if (!api_ip.hasAttribute('disabled') && api_ip.value) {
+            data.api_ip = api_ip.value;
         }
 
         // Se nenhum campo foi modificado, não faz nada
@@ -217,6 +264,15 @@
                     editTokenBtn.querySelector('svg').classList.remove('hidden');
                     editTokenBtn.querySelector('span').classList.add('hidden');
                     tokenStatus.classList.remove('hidden');
+                }
+                if (data.api_ip) {
+                    api_ip.setAttribute('disabled', true);
+                    api_ip.value = '';
+                    api_ip.setAttribute('placeholder', '*****************************');
+                    editIPBtn.classList.remove('hidden');
+                    editIPBtn.querySelector('svg').classList.remove('hidden');
+                    editIPBtn.querySelector('span').classList.add('hidden');
+                    ipStatus.classList.remove('hidden');
                 }
                 alert('Configurações salvas com sucesso!');
             })
