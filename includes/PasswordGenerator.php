@@ -17,16 +17,18 @@ class PasswordGenerator
         try {
             // Garante um caractere de cada tipo
             $password = [
-                self::getRandomChar(self::LOWERCASE),     // 1 minúscula
-                self::getRandomChar(self::LOWERCASE),     // 1 minúscula
                 self::getRandomChar(self::UPPERCASE),     // 1 maiúscula
                 self::getRandomChar(self::UPPERCASE),     // 1 maiúscula
+                self::getRandomChar(self::LOWERCASE),     // 1 minúscula
+                self::getRandomChar(self::LOWERCASE),     // 1 minúscula
+                self::getRandomChar(self::LOWERCASE),     // 1 minúscula
+                self::getRandomChar(self::LOWERCASE),     // 1 minúscula
+                // self::getRandomChar(self::SPECIAL),       // 1 especial
+                // self::getRandomChar(self::SPECIAL),       // 1 especial
+                self::getRandomChar(self::LOWERCASE),     // 1 minúscula
+                self::getRandomChar(self::LOWERCASE),     // 1 minúscula
                 self::getRandomChar(self::NUMBERS),       // 1 número
                 self::getRandomChar(self::NUMBERS),       // 1 número
-                self::getRandomChar(self::SPECIAL),       // 1 especial
-                self::getRandomChar(self::SPECIAL),       // 1 especial
-                self::getRandomChar(self::LOWERCASE),     // 1 minúscula
-                self::getRandomChar(self::UPPERCASE),     // 1 maiúscula
             ];
 
             // Embaralha o array de caracteres
