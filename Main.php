@@ -68,4 +68,13 @@ if (class_exists('WooCWP\Includes\MainIncludes') && file_exists($mainIncludesFil
 
     // processa criação da conta no CWP apos pagamento completo
     add_action('woocommerce_payment_complete', array($pluginInstance, 'processSharesAfterPayment'));
+    add_action('woocommerce_order_status_completed', array($pluginInstance, 'processSharesAfterPayment'));
+
+    add_action('woo_cwp_create_account', function ($user, $password, $domain, $email) {
+        WooCWP\Includes\ProcessSharesAfterPayment::createAccountCWP($user, $password, $domain, $email);
+    }, 10, 4);
+
+    // add_action('woo_cwp_send_email', function ($email, $username, $password, $domain) {
+    //     WooCWP\Includes\ProcessSharesAfterPayment::sendEmailUser($email, $username, $password, $domain);
+    // }, 10, 4);
 }
