@@ -20,6 +20,10 @@ if (!defined('WOO_CWP_PLUGIN_PATH')) {
 if (!defined('WOO_CWP_PLUGIN_URL')) {
     define('WOO_CWP_PLUGIN_URL', untrailingslashit(plugins_url('/', WOO_CWP_PLUGIN_FILE)));
 }
+if (!defined('WOO_CWP_LOG_DIR')) {
+    // no WooCWP\Includes\Activate cria o diretorio caso não exista.
+    define('WOO_CWP_LOG_DIR', untrailingslashit(wp_upload_dir()['basedir'] . '/woo-cwp-logs'));
+}
 
 defined('ABSPATH') || exit;
 
@@ -70,9 +74,9 @@ if (class_exists('WooCWP\Includes\MainIncludes') && file_exists($mainIncludesFil
     add_action('woocommerce_payment_complete', array($pluginInstance, 'processSharesAfterPayment'));
     add_action('woocommerce_order_status_completed', array($pluginInstance, 'processSharesAfterPayment'));
 
-    add_action('woo_cwp_create_account', function ($user, $password, $domain, $email) {
-        WooCWP\Includes\ProcessSharesAfterPayment::createAccountCWP($user, $password, $domain, $email);
-    }, 10, 4);
+    add_action('woo_cwp_create_account', function ($postData, $apiUrl) {
+        WooCWP\Includes\ProcessSharesAfterPayment::createAccountCWP($postData, $apiUrl);
+    }, 10, 2);
 
     // add_action('woo_cwp_send_email', function ($email, $username, $password, $domain) {
     //     WooCWP\Includes\ProcessSharesAfterPayment::sendEmailUser($email, $username, $password, $domain);

@@ -74,15 +74,13 @@ final class MainIncludes
         AddCustomCheckoutFields::validateCustomFieldsCheckout($data, $errors);
     }
 
+    public function checkoutUpdateOrderMeta($order_id)
+    {
+        AddCustomCheckoutFields::checkoutUpdateOrderMeta($order_id);
+    }
+
     public function processSharesAfterPayment($order_id)
     {
         ProcessSharesAfterPayment::processSharesAfterPayment($order_id);
-    }
-
-    public function checkoutUpdateOrderMeta($order_id)
-    {
-        if (!empty($_POST['billing_domain'])) {
-            update_post_meta($order_id, '_billing_domain', sanitize_text_field($_POST['billing_domain']));
-        }
     }
 }
