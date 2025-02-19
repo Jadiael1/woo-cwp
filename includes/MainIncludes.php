@@ -38,7 +38,7 @@ final class MainIncludes
     {
         if (!class_exists('WooCommerce')) {
             add_action('admin_notices', function () {
-                echo '<div class="error"><p><strong>Woo-CWP</strong> requires WooCommerce to work. Please activate WooCommerce first.</p></div>';
+                echo '<div class="error"><p><strong>cwp-woo</strong> requires WooCommerce to work. Please activate WooCommerce first.</p></div>';
             });
             return;
         }

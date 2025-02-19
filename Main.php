@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Plugin Name: Woo-CWP
+ * Plugin Name: CWP-Woo
  * Description: Integração entre WooCommerce e CWP
  * Author:      Jadiael
  * Author URI:  https://juvhost.com
  * License:     GNU General Public License v3 or later
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
- * Version:     0.1.0
+ * Version:     1.0.0
  * Requires Plugins: woocommerce
  * 
- * @package     woo-cwp
+ * @package     cwp-woo
  */
 if (!defined('WOO_CWP_PLUGIN_FILE')) {
     define('WOO_CWP_PLUGIN_FILE', __FILE__);
@@ -23,7 +23,7 @@ if (!defined('WOO_CWP_PLUGIN_URL')) {
 }
 if (!defined('WOO_CWP_LOG_DIR')) {
     // no WooCWP\Includes\Activate cria o diretorio caso não exista.
-    define('WOO_CWP_LOG_DIR', untrailingslashit(wp_upload_dir()['basedir'] . '/woo-cwp-logs'));
+    define('WOO_CWP_LOG_DIR', untrailingslashit(wp_upload_dir()['basedir'] . '/cwp-woo-logs'));
 }
 if (!defined('WOO_CWP_DELAY_REGISTER')) {
     define('WOO_CWP_DELAY_REGISTER', 7);

@@ -13,8 +13,8 @@ class Activate
         if (!is_plugin_active('woocommerce/woocommerce.php')) {
             deactivate_plugins(plugin_basename(__FILE__));
             wp_die(
-                __('Este plugin requer o WooCommerce ativo. Por favor, instale e ative o WooCommerce.', 'woo-cwp'),
-                __('Erro de dependência', 'woo-cwp'),
+                __('Este plugin requer o WooCommerce ativo. Por favor, instale e ative o WooCommerce.', 'cwp-woo'),
+                __('Erro de dependência', 'cwp-woo'),
                 ['back_link' => true]
             );
         }
@@ -29,7 +29,7 @@ class Activate
 
     private static function createTable() {
         global $wpdb;
-        $nome_tabela = $wpdb->prefix . 'woo_cwp_status';
+        $nome_tabela = $wpdb->prefix . 'cwp_woo_status';
         $charset_collate = $wpdb->get_charset_collate();
     
         $sql = "CREATE TABLE $nome_tabela (

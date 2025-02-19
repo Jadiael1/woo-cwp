@@ -11,7 +11,7 @@ class GetCompletedOrders
     private static function insertOrUpdate(string $login_cwp, bool $status): void
     {
         global $wpdb;
-        $nome_tabela = $wpdb->prefix . 'woo_cwp_status';
+        $nome_tabela = $wpdb->prefix . 'cwp_woo_status';
         $existingRecord = $wpdb->get_var($wpdb->prepare("SELECT id FROM $nome_tabela WHERE login_cwp = %s", $login_cwp));
         $data = array('login_cwp' => $login_cwp, 'status' => $status);
         $formats = array('%s', '%d');
@@ -29,7 +29,7 @@ class GetCompletedOrders
     private static function getStatusFromDb(string $login): ?string
     {
         global $wpdb;
-        $nome_tabela = $wpdb->prefix . 'woo_cwp_status';
+        $nome_tabela = $wpdb->prefix . 'cwp_woo_status';
         $existingRecord = $wpdb->get_var($wpdb->prepare("SELECT status FROM $nome_tabela WHERE login_cwp = %s", $login));
         if ($existingRecord === null) {
             \WooCWP\Includes\Log::registerLog($wpdb->last_error . ' - getStatusFromDb');
@@ -185,7 +185,7 @@ class GetCompletedOrders
 
 
         // Constrói URLs para a próxima e a página anterior
-        $base_url = rest_url('woo-cwp/v1/get-orders/');
+        $base_url = rest_url('cwp-woo/v1/get-orders/');
         $query_params = ['per_page' => $per_page];
 
         $next_page_url = $page < $total_pages ? add_query_arg(array_merge($query_params, ['page' => $page + 1]), $base_url) : null;

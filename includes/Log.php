@@ -61,7 +61,7 @@ class Log
     {
         global $wpdb;
         $success = $wpdb->insert(
-            $wpdb->prefix . 'woo_cwp_status',
+            $wpdb->prefix . 'cwp_woo_status',
             [
                 'login_cwp' => $loginCWP,
                 'status'  => $status

@@ -11,7 +11,7 @@ class SecureStorage
     public static function getEncryptionKey()
     {
         if (!isset(self::$encryption_key)) {
-            $env_key = getenv('WOO_CWP_KEY');
+            $env_key = getenv('CWP_WOO_KEY');
             self::$encryption_key = !empty($env_key) && $env_key !== false && $env_key !== null ? $env_key : 'cRYFNnD2I6tI/w4lMfvY8LLxlEXRmx53/Jt/DShCUMw=';
         }
     }

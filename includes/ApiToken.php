@@ -8,7 +8,7 @@ class ApiToken
 {
     public static function generate_token()
     {
-        $username = 'woo-cwp-user';
+        $username = 'cwp-woo-user';
         $tokenPassword = get_option('woo_cwp_api_token_basic', null);
         if($tokenPassword){
             $basic_auth = base64_encode("$username:$tokenPassword");

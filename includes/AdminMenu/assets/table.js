@@ -3,10 +3,10 @@ fetchAndRenderOrders(1, 10);
 async function fetchAndRenderOrders(page = 1, perPage = 10) {
     try {
         const headers = new Headers();
-        headers.append('Authorization', wooCWPData.token);
+        headers.append('Authorization', cwpWooData.token);
         headers.append('Accept', 'application/json; charset=utf-8');
         headers.append('Content-Type', 'application/json; charset=utf-8');
-        const response = await fetch(`${wooCWPData.url}?page=${page}&per_page=${perPage}`, {
+        const response = await fetch(`${cwpWooData.url}?page=${page}&per_page=${perPage}`, {
             headers: headers,
         });
         if (!response.ok) throw new Error("Erro ao buscar os pedidos.");

@@ -1,5 +1,5 @@
 {
-    "name": "jadiael/woocwp",
+    "name": "jadiael/cwpwoo",
     "description": "Integração entre WooCommerce e CWP",
     "type": "wordpress-plugin",
     "license": "GPL",
@@ -19,6 +19,6 @@
     },
     "minimum-stability": "stable",
     "extra": {
-        "installer-name": "woocwp-account-sync"
+        "installer-name": "cwpwoo-account-sync"
     }
 }

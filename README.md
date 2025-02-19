@@ -1,10 +1,10 @@
-<h1>Woo-CWP</h1>
+<h1>CWP-Woo</h1>
 <p>
     <strong>Integração entre WooCommerce e CWP</strong>
     <br>
     Autor: Jadiael
     <br>
-    Versão: 0.1.0
+    Versão: 1.0.0
     <br>
     Licença: <a rel="noopener" target="_new" href="http://www.gnu.org/licenses/gpl-3.0.html">GNU GPL v3</a>
 </p>
@@ -69,7 +69,7 @@
 <hr>
 <h2 id="introdu%C3%A7%C3%A3o">📝 Introdução</h2>
 <p>
-    O <strong>Woo-CWP</strong> é um plugin para
+    O <strong>CWP-Woo</strong> é um plugin para
     WordPress que integra o <strong>WooCommerce</strong> com o <strong>CWP (CentOS Web Panel)</strong>. Ele é voltado
     para lojas que vendem
     planos de hospedagem e utilizam o CWP como painel de controle. Quando um pedido é concluído no WooCommerce, o
@@ -104,11 +104,11 @@
 <ol>
     <li>Faça o download do plugin.</li>
     <li>Extraia o conteúdo do arquivo zipado na pasta
-        <code>wp-content/plugins/woo-cwp</code>.
+        <code>wp-content/plugins/cwp-woo</code>.
     </li>
     <li>
         Ative o plugin pelo painel do WordPress em
-        <strong>Plugins &gt; Woo-CWP</strong>.
+        <strong>Plugins &gt; cwp-woo</strong>.
     </li>
     <li>
         Acesse o menu administrativo do plugin para configurar as credenciais da API do CWP.
@@ -145,7 +145,7 @@
 </ol>
 <p>
     ⚠️ <strong>Importante:</strong> Configure uma
-    variável de ambiente chamada <code>WOO_CWP_KEY</code> no seu servidor com uma
+    variável de ambiente chamada <code>CWP_WOO_KEY</code> no seu servidor com uma
     chave segura para que o plugin utilize essa chave como prioridade na criptografia dos dados. Caso não exista,
     uma chave padrão será usada como fallback.
 </p>
@@ -293,7 +293,7 @@
     <li><strong>Prioridade de
             segurança:</strong>
         <ul>
-            <li>O plugin procura pela variável de ambiente <code>WOO_CWP_KEY</code>.</li>
+            <li>O plugin procura pela variável de ambiente <code>CWP_WOO_KEY</code>.</li>
             <li>Se não existir, utiliza uma chave de fallback (menos seguro).</li>
         </ul>
     </li>
@@ -341,7 +341,7 @@
     <li>
         Garanta que seu site tenha visitas regulares para que o WP-CRON seja acionado.
     </li>
-    <li>Utilize uma chave de criptografia via <code>WOO_CWP_KEY</code> para maior segurança.</li>
+    <li>Utilize uma chave de criptografia via <code>CWP_WOO_KEY</code> para maior segurança.</li>
     <li>
         Para ambientes com CWP no mesmo servidor do WordPress, considere utilizar a opção de API externa.
     </li>

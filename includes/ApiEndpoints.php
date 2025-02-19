@@ -9,7 +9,7 @@ class ApiEndpoints
     public static function register_routes()
     {
         register_rest_route(
-            'woo-cwp/v1',
+            'cwp-woo/v1',
             '/save-settings/',
             [
                 'methods'  => 'POST',
@@ -19,7 +19,7 @@ class ApiEndpoints
         );
 
         register_rest_route(
-            'woo-cwp/v1',
+            'cwp-woo/v1',
             '/get-orders/',
             [
                 'methods'  => 'GET',

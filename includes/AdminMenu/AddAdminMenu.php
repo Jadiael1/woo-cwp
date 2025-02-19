@@ -14,7 +14,7 @@ class AddAdminMenu
         if (file_exists($html_file)) {
             $fileContent = file_get_contents($html_file);
             $token = \WooCWP\Includes\ApiToken::generate_token();
-            $apiURL = rest_url() . 'woo-cwp/v1/save-settings/';
+            $apiURL = rest_url() . 'cwp-woo/v1/save-settings/';
             $isToken = (bool) get_option('woo_cwp_api_token') ?? false;
             $isUrl = (bool) get_option('woo_cwp_api_url') ?? false;
             $isIP = (bool) get_option('woo_cwp_api_ip') ?? false;
@@ -29,49 +29,49 @@ class AddAdminMenu
 
             echo $fileContent;
         } else {
-            echo '<div class="wrap"><h1>Configurações do WooCWP</h1><p>Arquivo de conteúdo não encontrado.</p></div>';
+            echo '<div class="wrap"><h1>Configurações do CWPWoo</h1><p>Arquivo de conteúdo não encontrado.</p></div>';
         }
     }
 
     public static function addAdminMenu()
     {
         add_menu_page(
-            'WooCWP Menu',                                                      // Título da página
-            'WooCWP',                                                           // Nome do menu
+            'CWPWoo Menu',                                                      // Título da página
+            'CWPWoo',                                                           // Nome do menu
             'manage_options',                                                   // Permissão necessária
-            'woo-cwp-menu',                                                     // Slug do menu
+            'cwp-woo-menu',                                                     // Slug do menu
             array(self::class, 'addAdminMenuContent'),                          // Callback para exibir o conteúdo
             'dashicons-admin-generic',                                          // Ícone do menu
             56                                                                  // Posição do menu no painel
         );
 
         add_submenu_page(
-            'woo-cwp-menu',
+            'cwp-woo-menu',
             'Geral',
             'Geral',
             'manage_options',
-            'woo-cwp-menu',
+            'cwp-woo-menu',
             [self::class, 'addAdminMenuContent']
         );
 
         add_submenu_page(
-            'woo-cwp-menu',                         // Slug do menu principal
+            'cwp-woo-menu',                         // Slug do menu principal
             'Configurações',                        // Título da página
             'Configurações',                        // Nome do submenu
             'manage_options',                       // Permissão necessária
-            'woo-cwp-settings',                     // Slug do submenu
+            'cwp-woo-settings',                     // Slug do submenu
             [self::class, 'addAdminMenuContent']    // Callback para exibir o conteúdo
         );
     }
 
     public static function addEnqueueScriptAdminMenu($hook)
     {
-        $allowed_hooks = ['toplevel_page_woo-cwp-menu'];
+        $allowed_hooks = ['toplevel_page_cwp-woo-menu'];
         if (!in_array($hook, $allowed_hooks, true)) {
             return;
         }
         wp_enqueue_script(
-            'woo-cwp-admin-js',
+            'cwp-woo-admin-js',
             WOO_CWP_PLUGIN_URL . '/includes/AdminMenu/assets/table.js',
             [],
             '1.0.0',
@@ -82,12 +82,12 @@ class AddAdminMenu
 
         // Dados PHP a serem passados para o JavaScript
         $php_data = array(
-            'url' => get_rest_url(null, '/woo-cwp/v1/get-orders'),
+            'url' => get_rest_url(null, '/cwp-woo/v1/get-orders'),
             'token'    => $token,
         );
 
         // Passa os dados para o script enfileirado
-        wp_localize_script('woo-cwp-admin-js', 'wooCWPData', $php_data);
+        wp_localize_script('cwp-woo-admin-js', 'cwpWooData', $php_data);
     }
 
     public static function handleRequest(\WP_REST_Request $request)
