@@ -4,7 +4,7 @@
  * Plugin Name: Woo-CWP
  * Description: Integração entre WooCommerce e CWP
  * Author:      Jadiael
- * Author URI:  https://fcx.ferreiracosta.com.br
+ * Author URI:  https://juvhost.com
  * License:     GNU General Public License v3 or later
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  * Version:     0.1.0
