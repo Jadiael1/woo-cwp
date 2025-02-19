@@ -10,6 +10,14 @@ class Activate
 
     public static function activate()
     {
+        if (!is_plugin_active('woocommerce/woocommerce.php')) {
+            deactivate_plugins(plugin_basename(__FILE__));
+            wp_die(
+                __('Este plugin requer o WooCommerce ativo. Por favor, instale e ative o WooCommerce.', 'woo-cwp'),
+                __('Erro de dependência', 'woo-cwp'),
+                ['back_link' => true]
+            );
+        }
         if (!file_exists(WOO_CWP_LOG_DIR)) {
             wp_mkdir_p(WOO_CWP_LOG_DIR);
         }
