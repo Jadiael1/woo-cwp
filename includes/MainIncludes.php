@@ -5,7 +5,7 @@ namespace WooCWP\Includes;
 use WooCWP\Includes\Activate;
 use WooCWP\Includes\Deactivate;
 use WooCWP\Includes\AdminMenu\AddAdminMenu;
-use WooCWP\Includes\ApiEndpoint;
+use WooCWP\Includes\ApiEndpoints;
 use WooCWP\Includes\AddCustomCheckoutFields;
 use WooCWP\Includes\ProcessSharesAfterPayment;
 
@@ -58,10 +58,14 @@ final class MainIncludes
     {
         AddAdminMenu::addAdminMenu();
     }
+    public function addEnqueueScriptAdminMenu($hook)
+    {
+        AddAdminMenu::addEnqueueScriptAdminMenu($hook);
+    }
 
     public function registerRoutes()
     {
-        ApiEndpoint::register_routes();
+        ApiEndpoints::register_routes();
     }
 
     public function addCustomCheckoutFields($checkout)
@@ -82,5 +86,10 @@ final class MainIncludes
     public function processSharesAfterPayment($order_id)
     {
         ProcessSharesAfterPayment::processSharesAfterPayment($order_id);
+    }
+
+    public function processCron($postData, $apiUrl)
+    {
+        ProcessSharesAfterPayment::processCron($postData, $apiUrl);
     }
 }

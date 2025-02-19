@@ -9,23 +9,32 @@ class ProcessSharesAfterPayment
 
     private function __construct() {}
 
-    private static function getPostData($username, $password, $domain, $email)
+    private static function schedule_woo_cwp_event(array $postData, string $apiUrl, int $minDelay = WOO_CWP_DELAY_REGISTER)
+    {
+        $next_available = (int) get_option('woo_cwp_next_available_time', time());
+        $current_time   = time();
+        $scheduled_time = max($current_time + $minDelay, $next_available);
+        update_option('woo_cwp_next_available_time', $scheduled_time);
+        wp_schedule_single_event($scheduled_time, 'woo_cwp_create_account', [$postData, $apiUrl]);
+    }
+
+    private static function getPostData($username, $password, $domain, $email, $plan)
     {
         $api_url_encrypted = get_option('woo_cwp_api_url');
         $api_token_encrypted = get_option('woo_cwp_api_token');
         $api_ip_encrypted = get_option('woo_cwp_api_ip');
+        $intermediate_api_url_encrypted = get_option('woo_cwp_intermediate_api_url');
         if (!$api_url_encrypted || !$api_token_encrypted || !$api_ip_encrypted) {
-            $errorSettingsNotFound = array('status' => 'error', 'message' => 'Configurações da API não encontradas.');
-            error_log(json_encode($errorSettingsNotFound) . PHP_EOL, 3, WOO_CWP_LOG_DIR . '/error_settings_not_found.json');
-            return;
+            \WooCWP\Includes\Log::registerLog('Configurações da API não encontradas.');
+            return null;
         }
         $api_url = \WooCWP\Includes\SecureStorage::decrypt($api_url_encrypted) . 'account';
         $api_token = \WooCWP\Includes\SecureStorage::decrypt($api_token_encrypted);
         $api_ip = \WooCWP\Includes\SecureStorage::decrypt($api_ip_encrypted);
+        $intermediate_api_url = \WooCWP\Includes\SecureStorage::decrypt($intermediate_api_url_encrypted);
         if (!$api_url || !$api_token || !$api_ip) {
-            $errorDecrypt = array('status' => 'error', 'message' => 'Falha ao descriptografar as configurações da API.');
-            error_log(json_encode($errorDecrypt) . PHP_EOL, 3, WOO_CWP_LOG_DIR . '/error_decrypt.json');
-            return;
+            \WooCWP\Includes\Log::registerLog('Falha ao descriptografar as configurações da API.');
+            return null;
         }
 
         return array(
@@ -36,13 +45,14 @@ class ProcessSharesAfterPayment
             'domain' => $domain,
             'email' => $email,
             'encodepass' => 'true',
-            'package' => "Starter",
+            'package' => $plan,
             'lang' => 'pt',
             'inode' => 0,
             'limit_nproc' => 999,
             'limit_nofile' => 999999,
             'server_ips' => $api_ip,
-            'api_url' => $api_url
+            'api_url' => $api_url,
+            'intermediate_api_url' => $intermediate_api_url
         );
     }
 
@@ -69,11 +79,18 @@ class ProcessSharesAfterPayment
     {
         try {
             $apiUrl = apply_filters('woo_cwp_api_url_modify', $apiUrl);
+            $logFile = WOO_CWP_LOG_DIR . "/response_{$postData['user']}.json";
             if (self::verifyCurlBinSystem()) {
+                \WooCWP\Includes\Log::registerSyncDb($postData['user']);
+                \WooCWP\Includes\Log::registerLog('creating account using exec and curl');
+                if (file_exists($logFile)) {
+                    unlink($logFile);
+                }
                 $command = sprintf(
-                    "curl -s -X POST -d %s '%s' > " . WOO_CWP_LOG_DIR . "/response_curl_cli_" . $postData['user'] . ".json",
+                    "curl -s -X POST -d %s '%s' > %s 2>&1",
                     escapeshellarg(http_build_query($postData)),
-                    $apiUrl
+                    $apiUrl,
+                    escapeshellarg($logFile)
                 );
                 if (function_exists('fastcgi_finish_request')) {
                     fastcgi_finish_request();
@@ -81,35 +98,58 @@ class ProcessSharesAfterPayment
                 exec($command);
                 return;
             } else {
-                error_log(json_encode(array('api_url' => $apiUrl, 'post_data' => $postData, 'error_message' => 'curl is probably not enabled on your operating system')) . PHP_EOL, 3, WOO_CWP_LOG_DIR . '/status_curl_cli_' . $postData['user'] . '.json');
+                \WooCWP\Includes\Log::registerLog('exec or curl is probably not enabled on your operating system');
             }
 
             // fallback
             // Faz a solicitação à API do CWP para criar a conta
-            error_log(json_encode(array('api_url' => $apiUrl, 'post_data' => $postData, 'client' => 'wp_rempte_post')) . PHP_EOL, 3, WOO_CWP_LOG_DIR . '/response_curl_cli_' . $postData['user'] . '.json');
+            \WooCWP\Includes\Log::registerSyncDb($postData['user']);
+            \WooCWP\Includes\Log::registerLog('creating account using wp_remote_post');
             if (function_exists('fastcgi_finish_request')) {
                 fastcgi_finish_request();
             }
-            $response = wp_remote_post($apiUrl, array(
+            wp_remote_post($apiUrl, array(
                 'body' => $postData,
                 'blocking' => false
             ));
 
-            if (is_wp_error($response)) {
-                $isWpError = array('status' => 'error');
-                error_log(json_encode($isWpError) . PHP_EOL, 3, WOO_CWP_LOG_DIR . '/response_wp_error.json');
-                return;
-            }
+            // if (is_wp_error($response)) {
+            //     $isWpError = array('status' => 'Error', 'response' => $response);
+            //     error_log(json_encode($isWpError) . PHP_EOL, 3, $logFile);
+            //     return;
+            // }
+            // $responseBody = wp_remote_retrieve_body($response);
+            // if (file_exists($logFile)) {
+            //     unlink($logFile);
+            // }
+            // error_log(json_encode($responseBody) . PHP_EOL, 3, $logFile);
         } catch (\Exception $e) {
+            $logFile = WOO_CWP_LOG_DIR . "/error_create_account_cwp_{$postData['user']}.json";
             $data = json_encode(array('api_url' => $apiUrl, 'post_data' => $postData, 'error_message' => $e->getMessage(), 'error' => $e));
-            error_log($data . PHP_EOL, 3, WOO_CWP_LOG_DIR . '/error_create_account_cwp_' . $postData['user'] . '.json');
+            error_log($data . PHP_EOL, 3, $logFile);
         }
     }
 
-    public static function sendEmailUser($email, $username, $password, $domain)
+    public static function sendEmailUser($order_id)
     {
+        $cwp_logins_serialized = get_post_meta($order_id, 'cwp_logins', true);
+        $cwp_passwords_serialized = get_post_meta($order_id, 'cwp_passwords', true);
+        $cwp_emails_serialized = get_post_meta($order_id, 'cwp_emails', true);
+        $cwp_domains_serialized = get_post_meta($order_id, 'cwp_domains', true);
+        if ($cwp_logins_serialized === false || empty($cwp_logins_serialized) || $cwp_passwords_serialized === false || empty($cwp_passwords_serialized) && $cwp_emails_serialized === false && empty($cwp_emails_serialized)) {
+            \WooCWP\Includes\Log::registerLog('error sending account creation email in cwp. - sendEmailUser');
+        }
+        $cwp_logins = maybe_unserialize($cwp_logins_serialized);
+        $cwp_passwords = maybe_unserialize($cwp_passwords_serialized);
+        $cwp_domains = maybe_unserialize($cwp_domains_serialized);
+        $cwp_emails = maybe_unserialize($cwp_emails_serialized);
+
+        $users = implode(', ', $cwp_logins);
+        $passwords = implode(', ', $cwp_passwords);
+        $domains = implode(', ', $cwp_domains);
+
         $subject = 'Sua conta no CWP foi criada';
-        $message = "Olá,\n\nSua conta no CWP foi criada com sucesso.\n\nDetalhes da conta:\nUsuário: $username\nSenha: $password\nDomínio: $domain\n\n";
+        $message = "Olá,\n\nSua conta no CWP foi criada com sucesso.\n\nDetalhes da conta:\nUsuário: $users\nSenha: $passwords\nDomínio: $domains\n\n";
         $message .= "URL de acesso ao painel do usuário: https://cpanel.juvhost.com/\n\n";
         $message .= "Para apontar seu domínio corretamente, utilize as seguintes informações:\n";
         $message .= "Servidor IP: 161.97.121.93\n";
@@ -117,9 +157,8 @@ class ProcessSharesAfterPayment
         $message .= "Ns1: ns1.juvhost.com\n";
         $message .= "Ns2: ns2.juvhost.com\n\n";
         $message .= "Por favor, acesse o painel do CWP para mais informações.";
-        wp_mail($email, $subject, $message);
+        wp_mail($cwp_emails[0], $subject, $message);
     }
-
 
     private static function appendToMeta(int $post_id, string $meta_key, $new_value): bool
     {
@@ -151,10 +190,32 @@ class ProcessSharesAfterPayment
         }
         $domainsByCategories = maybe_unserialize($domainsSerialized);
 
-        $time = 25;
+        $cwp_logins_serialized = get_post_meta($order_id, 'cwp_logins', true);
+        $cwp_passwords_serialized = get_post_meta($order_id, 'cwp_passwords', true);
+        $cwp_emails_serialized = get_post_meta($order_id, 'cwp_emails', true);
+        $cwp_domains_serialized = get_post_meta($order_id, 'cwp_domains', true);
+        $cwp_plans_serialized = get_post_meta($order_id, 'cwp_plans', true);
 
-        foreach ($domainsByCategories as $key => $domainsByCategory) {
-            foreach ($domainsByCategory as $key1 => $domainByCategory) {
+        if ($cwp_logins_serialized !== false && !empty($cwp_logins_serialized) && $cwp_passwords_serialized !== false && !empty($cwp_passwords_serialized) && $cwp_emails_serialized !== false && !empty($cwp_emails_serialized)) {
+            $cwp_logins = maybe_unserialize($cwp_logins_serialized);
+            $cwp_passwords = maybe_unserialize($cwp_passwords_serialized);
+            $cwp_emails = maybe_unserialize($cwp_emails_serialized);
+            $cwp_domains = maybe_unserialize($cwp_domains_serialized);
+            $cwp_plans = maybe_unserialize($cwp_plans_serialized);
+            foreach ($cwp_logins as $key => $login) {
+                $postData = self::getPostData($login, $cwp_passwords[$key], $cwp_domains[$key], $cwp_emails[$key], $cwp_plans[$key]);
+                $apiUrl = $postData['intermediate_api_url'] === null ? $postData['api_url'] : $postData['intermediate_api_url'];
+                unset($postData['api_url']);
+                unset($postData['intermediate_api_url']);
+                self::schedule_woo_cwp_event($postData, $apiUrl);
+            }
+            self::sendEmailUser($order_id);
+            return;
+        }
+
+        // fallback
+        foreach ($domainsByCategories as $domainsByCategory) {
+            foreach ($domainsByCategory as $domainByCategory) {
                 $post_object = get_post($domainByCategory['product_id']);
                 if (!$post_object) {
                     continue;
@@ -165,25 +226,35 @@ class ProcessSharesAfterPayment
                     continue;
                 }
                 $planName = ucfirst(substr($planName, 0, $pos));
-                $user_cwp_login = GenerateUniqueUserName::generateFromEmail($order->get_billing_email());
-                $user_cwp_password = PasswordGenerator::generate();
+
+                $user_cwp_login =  \WooCWP\Includes\GenerateUniqueUserName::generateFromEmail($order->get_billing_email());
+                $user_cwp_password = \WooCWP\Includes\PasswordGenerator::generate();
 
                 self::appendToMeta($order_id, 'cwp_logins', $user_cwp_login);
                 self::appendToMeta($order_id, 'cwp_passwords', $user_cwp_password);
                 self::appendToMeta($order_id, 'cwp_emails', $order->get_billing_email());
+                self::appendToMeta($order_id, 'cwp_domains', $domainByCategory['domain']);
+                self::appendToMeta($order_id, 'cwp_plans', $planName);
 
-                $postData = self::getPostData($user_cwp_login, $user_cwp_password, $domainByCategory['domain'], $order->get_billing_email());
-                $apiUrl = $postData['api_url'];
+                $postData = self::getPostData($user_cwp_login, $user_cwp_password, $domainByCategory['domain'], $order->get_billing_email(), $planName);
+                $apiUrl = $postData['intermediate_api_url'] === null ? $postData['api_url'] : $postData['intermediate_api_url'];
                 unset($postData['api_url']);
-
-                // exemplo com WP-Cron;
-                wp_schedule_single_event(time() + $time, 'woo_cwp_create_account', [
-                    'postData' => $postData,
-                    'apiUrl' => $apiUrl
-                ]);
-                $time += 25;
-                // self::sendEmailUser($email, $username, $password, $domain);
+                unset($postData['intermediate_api_url']);
+                self::schedule_woo_cwp_event($postData, $apiUrl);
             }
         }
+        self::sendEmailUser($order_id);
+    }
+
+    public static function processCron($postData, $apiUrl)
+    {
+        $next_available = (int) get_option('woo_cwp_next_available_time', time());
+        $current_time = time();
+        if ($current_time < $next_available) {
+            wp_schedule_single_event($next_available, 'woo_cwp_create_account', [$postData, $apiUrl]);
+            return;
+        }
+        \WooCWP\Includes\ProcessSharesAfterPayment::createAccountCWP($postData, $apiUrl);
+        update_option('woo_cwp_next_available_time', $current_time + intval(WOO_CWP_DELAY_REGISTER));
     }
 }

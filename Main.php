@@ -24,6 +24,9 @@ if (!defined('WOO_CWP_LOG_DIR')) {
     // no WooCWP\Includes\Activate cria o diretorio caso não exista.
     define('WOO_CWP_LOG_DIR', untrailingslashit(wp_upload_dir()['basedir'] . '/woo-cwp-logs'));
 }
+if (!defined('WOO_CWP_DELAY_REGISTER')) {
+    define('WOO_CWP_DELAY_REGISTER', 7);
+}
 
 defined('ABSPATH') || exit;
 
@@ -54,9 +57,9 @@ if (class_exists('WooCWP\Includes\MainIncludes') && file_exists($mainIncludesFil
     //deactivation
     register_deactivation_hook(WOO_CWP_PLUGIN_FILE, array($pluginInstance, 'deactivate'));
 
-
     // Adiciona o menu na administração do WordPress
     add_action('admin_menu', array($pluginInstance, 'addAdminMenu'));
+    add_action('admin_enqueue_scripts', array($pluginInstance, 'addEnqueueScriptAdminMenu'), 10, 1);
 
     // Hook para registrar os endpoints na API REST
     add_action('rest_api_init', array($pluginInstance, 'registerRoutes'));
@@ -70,13 +73,11 @@ if (class_exists('WooCWP\Includes\MainIncludes') && file_exists($mainIncludesFil
     // Salva o campos personalizado na tela de checkout como meta dados na ordem gerada
     add_action('woocommerce_checkout_update_order_meta', array($pluginInstance, 'checkoutUpdateOrderMeta'));
 
-    // processa criação da conta no CWP apos pagamento completo
+    // processa criação da conta no CWP apos pagamento completo ou ordem movida para concluido.
     add_action('woocommerce_payment_complete', array($pluginInstance, 'processSharesAfterPayment'));
     add_action('woocommerce_order_status_completed', array($pluginInstance, 'processSharesAfterPayment'));
 
-    add_action('woo_cwp_create_account', function ($postData, $apiUrl) {
-        WooCWP\Includes\ProcessSharesAfterPayment::createAccountCWP($postData, $apiUrl);
-    }, 10, 2);
+    add_action('woo_cwp_create_account', array($pluginInstance, 'processCron'), 10, 2);
 
     // add_action('woo_cwp_send_email', function ($email, $username, $password, $domain) {
     //     WooCWP\Includes\ProcessSharesAfterPayment::sendEmailUser($email, $username, $password, $domain);
