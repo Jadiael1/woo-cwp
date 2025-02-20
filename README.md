@@ -327,7 +327,7 @@
 <h2 id="licen%C3%A7a">📄 Licença</h2>
 <p>
     Este projeto está licenciado sob a
-    <a rel="noopener" target="_new" href="http://www.gnu.org/licenses/gpl-3.0.html">GNU General Public License v3</a>.
+    <a rel="noopener" target="_new" href="http://www.gnu.org/licenses/gpl-2.0.html">GNU General Public License v2</a>.
 </p>
 <hr>
 <h2>🛡️ Considerações Finais</h2>
