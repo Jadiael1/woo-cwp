@@ -9,20 +9,21 @@ Licença: [GNU GPL v3](http://www.gnu.org/licenses/gpl-3.0.html)
 
 ## 📖 Índice
 
-* [Introdução](#introdução)
-* [Funcionalidades](#funcionalidades)
-* [Instalação](#instalação)
-* [Configuração](#configuração)
-* [Uso](#uso)
-* [Desafios Encontrados e Soluções](#desafios-encontrados-e-soluções)
+* [Introdução](#📝-introdução)
+* [Funcionalidades](#🚀-funcionalidades)
+* [Instalação](#🛠️-instalação)
+* [Configuração](#⚙️-configuração)
+* [Uso](#🖥️-uso)
+* [Desafios Encontrados e Soluções](#🧩-desafios-encontrados-e-soluções)
   * [1. Problemas de Conexão com o CWP no Mesmo Servidor](#1-problemas-de-conexão-com-o-cwp-no-mesmo-servidor)
   * [2. Garantia de Execução Assíncrona e Resposta Rápida](#2-garantia-de-execução-assíncrona-e-resposta-rápida)
   * [3. Verificação do Status de Criação de Conta](#3-verificação-do-status-de-criação-de-conta)
-  * [4. Alternativa com API Externa com Sistema de Filas](#4-alternativa-com-api-externa-com-sistema-de-filas)
+  * [4. Alternativa com API Externa com Sistema de Filas](#4-alternativa-com-api-externa-e-com-sistema-de-filas)
   * [5. Segurança e Armazenamento das Credenciais](#5-segurança-e-armazenamento-das-credenciais)
-* [Exemplos de Uso](#exemplos-de-uso)
-* [Contribuição](#contribuição)
-* [Licença](#licença)
+* [Exemplos de Uso](#🧪-exemplos-de-uso)
+* [Contribuição](#🤝-contribuição)
+* [Licença](#📄-licença)
+* [Considerações Finais](#🛡️-considerações-finais)
 
 ---
 
