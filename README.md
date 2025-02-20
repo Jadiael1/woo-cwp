@@ -6,7 +6,7 @@
     <br>
     Versão: 1.0.0
     <br>
-    Licença: <a rel="noopener" target="_new" href="http://www.gnu.org/licenses/gpl-3.0.html">GNU GPL v3</a>
+    Licença: <a rel="noopener" target="_new" href="http://www.gnu.org/licenses/gpl-2.0.html">GNU GPL v2</a>
 </p>
 <hr>
 <h2>📖 Índice</h2>
