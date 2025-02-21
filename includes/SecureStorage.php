@@ -21,6 +21,9 @@ class SecureStorage
         if (empty($data)) {
             return null;
         }
+        if (empty($env_key) || $env_key === false || $env_key === null) {
+            self::getEncryptionKey();
+        }
         $key = hash('sha256', self::$encryption_key, true);
         $iv = openssl_random_pseudo_bytes(16);
         $encrypted = openssl_encrypt($data, 'AES-256-CBC', $key, 0, $iv);
@@ -33,26 +36,14 @@ class SecureStorage
         if (empty($data)) {
             return null;
         }
-
+        if (empty($env_key) || $env_key === false || $env_key === null) {
+            self::getEncryptionKey();
+        }
         $key = hash('sha256', self::$encryption_key, true);
         $data = base64_decode($data);
         $iv = substr($data, 0, 16);
         $encrypted = substr($data, 16);
 
         return openssl_decrypt($encrypted, 'AES-256-CBC', $key, 0, $iv);
-    }
-
-    public static function store_api_settings($api_url, $api_token)
-    {
-        update_option('woo_cwp_api_url', self::encrypt($api_url));
-        update_option('woo_cwp_api_token', self::encrypt($api_token));
-    }
-
-    public static function get_api_settings()
-    {
-        return [
-            'api_url' => self::decrypt(get_option('woo_cwp_api_url', '')),
-            'api_token' => self::decrypt(get_option('woo_cwp_api_token', ''))
-        ];
     }
 }
