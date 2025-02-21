@@ -9,7 +9,7 @@ class ApiToken
     public static function generate_token()
     {
         $username = 'cwp-woo-user';
-        $tokenPassword = get_option('woo_cwp_api_token_basic', null);
+        $tokenPassword = get_option('cwp_woo_api_token_basic', null);
         if($tokenPassword){
             $basic_auth = base64_encode("$username:$tokenPassword");
             return "Basic " . $basic_auth;
@@ -18,8 +18,8 @@ class ApiToken
         $basic_auth = base64_encode("$username:$password");
         // Tempo de expiração (24 horas)
         $expiration = time() + (1440 * 60);
-        update_option('woo_cwp_api_token_basic', $password);
-        update_option('woo_cwp_api_token_basic_expiration', $expiration);
+        update_option('cwp_woo_api_token_basic', $password);
+        update_option('cwp_woo_api_token_basic_expiration', $expiration);
         return "Basic " . $basic_auth;
     }
 
@@ -27,8 +27,8 @@ class ApiToken
     {
         $auth_header = $request->get_header('authorization');
         // Obtém o token salvo
-        $saved_token = get_option('woo_cwp_api_token_basic', '');
-        $expiration = get_option('woo_cwp_api_token_basic_expiration', 0);
+        $saved_token = get_option('cwp_woo_api_token_basic', '');
+        $expiration = get_option('cwp_woo_api_token_basic_expiration', 0);
         // Se expirou ou não existir, rejeita
         if (time() > $expiration || empty($saved_token)) {
             return false;
@@ -39,8 +39,8 @@ class ApiToken
             list($user, $pass) = explode(':', $decoded, 2);
             // Verifica se a senha bate
             if ($pass === $saved_token) {
-                // delete_option('woo_cwp_api_token_basic');
-                // delete_option('woo_cwp_api_token_basic_expiration');
+                // delete_option('cwp_woo_api_token_basic');
+                // delete_option('cwp_woo_api_token_basic_expiration');
                 return true;
             }
         }
