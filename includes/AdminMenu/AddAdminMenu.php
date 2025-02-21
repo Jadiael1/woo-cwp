@@ -15,10 +15,10 @@ class AddAdminMenu
             $fileContent = file_get_contents($html_file);
             $token = \WooCWP\Includes\ApiToken::generate_token();
             $apiURL = rest_url() . 'cwp-woo/v1/save-settings/';
-            $isToken = (bool) get_option('woo_cwp_api_token') ?? false;
-            $isUrl = (bool) get_option('woo_cwp_api_url') ?? false;
-            $isIP = (bool) get_option('woo_cwp_api_ip') ?? false;
-            $isIntermediateApiUrl = (bool) get_option('woo_cwp_intermediate_api_url') ?? false;
+            $isToken = (bool) get_option('cwp_woo_api_token') ?? false;
+            $isUrl = (bool) get_option('cwp_woo_api_url') ?? false;
+            $isIP = (bool) get_option('cwp_woo_api_ip') ?? false;
+            $isIntermediateApiUrl = (bool) get_option('cwp_woo_intermediate_api_url') ?? false;
 
             $fileContent = str_replace("{{AUTHORIZATION}}", esc_html($token), $fileContent);
             $fileContent = str_replace("{{API_URL}}", esc_html($apiURL), $fileContent);
@@ -106,27 +106,27 @@ class AddAdminMenu
         // Sanitiza os inputs para evitar XSS/injeção de código
         if (!empty($params['api_url'])) {
             $api_url   = \WooCWP\Includes\SecureStorage::encrypt(esc_url_raw($params['api_url']));
-            update_option('woo_cwp_api_url', $api_url);
+            update_option('cwp_woo_api_url', $api_url);
         } else if (isset($params['api_url']) && empty($params['api_url'])) {
-            delete_option('woo_cwp_api_url');
+            delete_option('cwp_woo_api_url');
         }
         if (!empty($params['api_token'])) {
             $api_token = \WooCWP\Includes\SecureStorage::encrypt(sanitize_text_field($params['api_token']));
-            update_option('woo_cwp_api_token', $api_token);
+            update_option('cwp_woo_api_token', $api_token);
         } else if (isset($params['api_token']) && empty($params['api_token'])) {
-            delete_option('woo_cwp_api_token');
+            delete_option('cwp_woo_api_token');
         }
         if (!empty($params['api_ip']) && filter_var($params['api_ip'], FILTER_VALIDATE_IP)) {
             $api_ip = \WooCWP\Includes\SecureStorage::encrypt($params['api_ip']);
-            update_option('woo_cwp_api_ip', $api_ip);
+            update_option('cwp_woo_api_ip', $api_ip);
         } else if (isset($params['api_ip']) && empty($params['api_ip'])) {
-            delete_option('woo_cwp_api_ip');
+            delete_option('cwp_woo_api_ip');
         }
         if (!empty($params['intermediate_api_url'])) {
             $intermediate_api_url = \WooCWP\Includes\SecureStorage::encrypt($params['intermediate_api_url']);
-            update_option('woo_cwp_intermediate_api_url', $intermediate_api_url);
+            update_option('cwp_woo_intermediate_api_url', $intermediate_api_url);
         } else if (isset($params['intermediate_api_url']) && empty($params['intermediate_api_url'])) {
-            delete_option('woo_cwp_intermediate_api_url');
+            delete_option('cwp_woo_intermediate_api_url');
         }
 
         return new \WP_REST_Response(['message' => 'Configurações salvas com sucesso!'], 200);
