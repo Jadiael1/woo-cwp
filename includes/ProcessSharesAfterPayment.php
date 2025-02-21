@@ -208,6 +208,9 @@ class ProcessSharesAfterPayment
                 if ($postData === null) {
                     return;
                 }
+                if ($postData['intermediate_api_url'] !== null) {
+                    self::createAccountCWP($postData);
+                }
                 self::schedule_cwp_woo_event($postData);
             }
             self::sendEmailUser($order_id);
@@ -240,6 +243,9 @@ class ProcessSharesAfterPayment
                 $postData = self::getPostData($user_cwp_login, $user_cwp_password, $domainByCategory['domain'], $order->get_billing_email(), $planName);
                 if ($postData === null) {
                     return;
+                }
+                if ($postData['intermediate_api_url'] !== null) {
+                    self::createAccountCWP($postData);
                 }
                 self::schedule_cwp_woo_event($postData);
             }
