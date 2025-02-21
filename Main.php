@@ -78,9 +78,9 @@ if (class_exists('WooCWP\Includes\MainIncludes') && file_exists($mainIncludesFil
     add_action('woocommerce_payment_complete', array($pluginInstance, 'processSharesAfterPayment'));
     add_action('woocommerce_order_status_completed', array($pluginInstance, 'processSharesAfterPayment'));
 
-    add_action('woo_cwp_create_account', array($pluginInstance, 'processCron'), 10, 2);
+    add_action('cwp_woo_create_account', array($pluginInstance, 'processCron'), 10, 1);
 
-    // add_action('woo_cwp_send_email', function ($email, $username, $password, $domain) {
+    // add_action('cwp_woo_send_email', function ($email, $username, $password, $domain) {
     //     WooCWP\Includes\ProcessSharesAfterPayment::sendEmailUser($email, $username, $password, $domain);
     // }, 10, 4);
 }
