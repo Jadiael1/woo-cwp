@@ -53,7 +53,7 @@ class Log
     {
         $date = new \DateTimeImmutable();
         $formattedDate = $date->format('d-m-Y H:i:s');
-        $logFile = WOO_CWP_LOG_DIR . "/woo_cwp.log";
+        $logFile = WOO_CWP_LOG_DIR . "/cwp_woo.log";
         error_log("[$formattedDate]: $message" . PHP_EOL, 3, $logFile);
     }
 
