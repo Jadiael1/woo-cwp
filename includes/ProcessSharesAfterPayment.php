@@ -9,21 +9,21 @@ class ProcessSharesAfterPayment
 
     private function __construct() {}
 
-    private static function schedule_woo_cwp_event(array $postData, string $apiUrl, int $minDelay = WOO_CWP_DELAY_REGISTER)
+    private static function schedule_cwp_woo_event(array $postData, int $minDelay = WOO_CWP_DELAY_REGISTER)
     {
-        $next_available = (int) get_option('woo_cwp_next_available_time', time());
+        $next_available = (int) get_option('cwp_woo_next_available_time', time());
         $current_time   = time();
         $scheduled_time = max($current_time + $minDelay, $next_available);
-        update_option('woo_cwp_next_available_time', $scheduled_time);
-        wp_schedule_single_event($scheduled_time, 'woo_cwp_create_account', [$postData, $apiUrl]);
+        update_option('cwp_woo_next_available_time', $scheduled_time);
+        wp_schedule_single_event($scheduled_time, 'cwp_woo_create_account', [$postData]);
     }
 
     private static function getPostData($username, $password, $domain, $email, $plan)
     {
-        $api_url_encrypted = get_option('woo_cwp_api_url');
-        $api_token_encrypted = get_option('woo_cwp_api_token');
-        $api_ip_encrypted = get_option('woo_cwp_api_ip');
-        $intermediate_api_url_encrypted = get_option('woo_cwp_intermediate_api_url');
+        $api_url_encrypted = get_option('cwp_woo_api_url');
+        $api_token_encrypted = get_option('cwp_woo_api_token');
+        $api_ip_encrypted = get_option('cwp_woo_api_ip');
+        $intermediate_api_url_encrypted = get_option('cwp_woo_intermediate_api_url', null);
         if (!$api_url_encrypted || !$api_token_encrypted || !$api_ip_encrypted) {
             \WooCWP\Includes\Log::registerLog('Configurações da API não encontradas.');
             return null;
@@ -31,7 +31,8 @@ class ProcessSharesAfterPayment
         $api_url = \WooCWP\Includes\SecureStorage::decrypt($api_url_encrypted) . 'account';
         $api_token = \WooCWP\Includes\SecureStorage::decrypt($api_token_encrypted);
         $api_ip = \WooCWP\Includes\SecureStorage::decrypt($api_ip_encrypted);
-        $intermediate_api_url = \WooCWP\Includes\SecureStorage::decrypt($intermediate_api_url_encrypted);
+
+        $intermediate_api_url = $intermediate_api_url_encrypted !== null ? \WooCWP\Includes\SecureStorage::decrypt($intermediate_api_url_encrypted) : null;
         if (!$api_url || !$api_token || !$api_ip) {
             \WooCWP\Includes\Log::registerLog('Falha ao descriptografar as configurações da API.');
             return null;
@@ -75,10 +76,10 @@ class ProcessSharesAfterPayment
         }
     }
 
-    public static function createAccountCWP($postData, $apiUrl)
+    public static function createAccountCWP($postData)
     {
         try {
-            $apiUrl = apply_filters('woo_cwp_api_url_modify', $apiUrl);
+            $apiUrl = $postData['intermediate_api_url'] === null ? $postData['api_url'] : $postData['intermediate_api_url'];
             $logFile = WOO_CWP_LOG_DIR . "/response_{$postData['user']}.json";
             if (self::verifyCurlBinSystem()) {
                 \WooCWP\Includes\Log::registerSyncDb($postData['user']);
@@ -92,9 +93,9 @@ class ProcessSharesAfterPayment
                     $apiUrl,
                     escapeshellarg($logFile)
                 );
-                if (function_exists('fastcgi_finish_request')) {
-                    fastcgi_finish_request();
-                }
+                // if (function_exists('fastcgi_finish_request')) {
+                //     fastcgi_finish_request();
+                // }
                 exec($command);
                 return;
             } else {
@@ -105,9 +106,9 @@ class ProcessSharesAfterPayment
             // Faz a solicitação à API do CWP para criar a conta
             \WooCWP\Includes\Log::registerSyncDb($postData['user']);
             \WooCWP\Includes\Log::registerLog('creating account using wp_remote_post');
-            if (function_exists('fastcgi_finish_request')) {
-                fastcgi_finish_request();
-            }
+            // if (function_exists('fastcgi_finish_request')) {
+            //     fastcgi_finish_request();
+            // }
             wp_remote_post($apiUrl, array(
                 'body' => $postData,
                 'blocking' => false
@@ -204,10 +205,10 @@ class ProcessSharesAfterPayment
             $cwp_plans = maybe_unserialize($cwp_plans_serialized);
             foreach ($cwp_logins as $key => $login) {
                 $postData = self::getPostData($login, $cwp_passwords[$key], $cwp_domains[$key], $cwp_emails[$key], $cwp_plans[$key]);
-                $apiUrl = $postData['intermediate_api_url'] === null ? $postData['api_url'] : $postData['intermediate_api_url'];
-                unset($postData['api_url']);
-                unset($postData['intermediate_api_url']);
-                self::schedule_woo_cwp_event($postData, $apiUrl);
+                if ($postData === null) {
+                    return;
+                }
+                self::schedule_cwp_woo_event($postData);
             }
             self::sendEmailUser($order_id);
             return;
@@ -237,24 +238,24 @@ class ProcessSharesAfterPayment
                 self::appendToMeta($order_id, 'cwp_plans', $planName);
 
                 $postData = self::getPostData($user_cwp_login, $user_cwp_password, $domainByCategory['domain'], $order->get_billing_email(), $planName);
-                $apiUrl = $postData['intermediate_api_url'] === null ? $postData['api_url'] : $postData['intermediate_api_url'];
-                unset($postData['api_url']);
-                unset($postData['intermediate_api_url']);
-                self::schedule_woo_cwp_event($postData, $apiUrl);
+                if ($postData === null) {
+                    return;
+                }
+                self::schedule_cwp_woo_event($postData);
             }
         }
         self::sendEmailUser($order_id);
     }
 
-    public static function processCron($postData, $apiUrl)
+    public static function processCron($postData)
     {
-        $next_available = (int) get_option('woo_cwp_next_available_time', time());
+        $next_available = (int) get_option('cwp_woo_next_available_time', time());
         $current_time = time();
         if ($current_time < $next_available) {
-            wp_schedule_single_event($next_available, 'woo_cwp_create_account', [$postData, $apiUrl]);
+            wp_schedule_single_event($next_available, 'cwp_woo_create_account', [$postData]);
             return;
         }
-        \WooCWP\Includes\ProcessSharesAfterPayment::createAccountCWP($postData, $apiUrl);
-        update_option('woo_cwp_next_available_time', $current_time + intval(WOO_CWP_DELAY_REGISTER));
+        \WooCWP\Includes\ProcessSharesAfterPayment::createAccountCWP($postData);
+        update_option('cwp_woo_next_available_time', $current_time + intval(WOO_CWP_DELAY_REGISTER));
     }
 }
