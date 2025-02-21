@@ -88,8 +88,8 @@ final class MainIncludes
         ProcessSharesAfterPayment::processSharesAfterPayment($order_id);
     }
 
-    public function processCron($postData, $apiUrl)
+    public function processCron($postData)
     {
-        ProcessSharesAfterPayment::processCron($postData, $apiUrl);
+        ProcessSharesAfterPayment::processCron($postData);
     }
 }
