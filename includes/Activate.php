@@ -36,6 +36,7 @@ class Activate
             id INTEGER NOT NULL AUTO_INCREMENT,
             login_cwp VARCHAR(255) NOT NULL,
             status TINYINT(1) NOT NULL DEFAULT 0,
+            UNIQUE KEY unique_login_cwp (login_cwp),
             PRIMARY KEY (id)
         ) $charset_collate;";
     

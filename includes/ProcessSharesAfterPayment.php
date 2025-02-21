@@ -210,8 +210,9 @@ class ProcessSharesAfterPayment
                 }
                 if ($postData['intermediate_api_url'] !== null) {
                     self::createAccountCWP($postData);
+                }else{
+                    self::schedule_cwp_woo_event($postData);
                 }
-                self::schedule_cwp_woo_event($postData);
             }
             self::sendEmailUser($order_id);
             return;
@@ -246,8 +247,9 @@ class ProcessSharesAfterPayment
                 }
                 if ($postData['intermediate_api_url'] !== null) {
                     self::createAccountCWP($postData);
+                }else{
+                    self::schedule_cwp_woo_event($postData);
                 }
-                self::schedule_cwp_woo_event($postData);
             }
         }
         self::sendEmailUser($order_id);
