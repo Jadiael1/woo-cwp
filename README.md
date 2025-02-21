@@ -146,6 +146,8 @@ Evitar os problemas de requisição direta para o CWP, especialmente quando seu 
   * Gerenciar as requisições em uma **fila de processamento**.
 * Isso é **altamente recomendado**, especialmente se essa API estiver em um ambiente diferente do servidor CWP. Ou que não sofra com os reload feito na hora da criação de uma conta pela API do CWP.
 
+Caso opte por usar API Intermediadora Externa olhe esse projeto 100% funcional que fiz voltado para esse caso:<br>https://github.com/Jadiael1/cwp-integration.git
+
 ---
 
 ### 5. Segurança e Armazenamento das Credenciais
