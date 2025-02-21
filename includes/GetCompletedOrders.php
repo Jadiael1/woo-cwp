@@ -58,9 +58,9 @@ class GetCompletedOrders
 
     private static function getStatusFromApi(string $login): ?string
     {
-        $api_url_encrypted = get_option('woo_cwp_api_url');
-        $api_token_encrypted = get_option('woo_cwp_api_token');
-        $api_ip_encrypted = get_option('woo_cwp_api_ip');
+        $api_url_encrypted = get_option('cwp_woo_api_url');
+        $api_token_encrypted = get_option('cwp_woo_api_token');
+        $api_ip_encrypted = get_option('cwp_woo_api_ip');
         if (!$api_url_encrypted || !$api_token_encrypted || !$api_ip_encrypted) {
             \WooCWP\Includes\Log::registerLog('API settings not found. - getStatusFromApi');
             return null;
@@ -88,7 +88,7 @@ class GetCompletedOrders
             \WooCWP\Includes\Log::registerLog('Failed to decode json. - getStatusFromApi');
             return null;
         }
-        $timestamp = wp_next_scheduled('woo_cwp_create_account');
+        $timestamp = wp_next_scheduled('cwp_woo_create_account');
         if ($userCWP['status'] === 'Error' && $userCWP['msj'] === 'User does not exist' && false === $timestamp) {
             return 'Erro';
         }
